@@ -25,7 +25,12 @@ In your sources use the generated data:
 
 	#include "timestamp.h"
 	...
-	std::cout << "this program compiled at " << build_time_str << std::endl
+	std::cout << "this program compiled at " << build_time_str << std::endl;
+	std::cout << "from git commit " << git_short_hash_str << std::endl;
+	if( std::string(git_dirty_str) == "" )
+		std::cout << "without any uncommitted changes" << std::endl;
+	else
+		std::cout << "with uncommitted changes!" << std::endl;
 
 The timestamp library's CMakeLists.txt will force
 a partial re-run of CMake every time you run your target

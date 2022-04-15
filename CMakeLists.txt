@@ -21,29 +21,57 @@ add_library( timestamp OBJECT timestamp.c)
 # Set CMake variable BUILD_TIME to 'now'.
 # This variable drives the CMake auto-update scripts, so
 # this must not be commented out!
+# (TIMESTAMP is a CMake built-in command)
 string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S" UTC)
 
 
 
-# optionaly, get also the git hash & refspec using
-# Ryan Pavlik's CMake scripts at
-# https://github.com/rpavlik/cmake-modules
-#include(GetGitRevisionDescription.cmake)
-#get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+##########################################################
+# Git versioning info.
+# First a helper function, then use it for select git data.
+find_package(Git)
+function(git_cmd optstring output)
+	# convert space separated string to CMake list, so it gets
+	# split into argvs for the git command (and not passed, spaces and all,
+	# in argv[1])
+	string(REPLACE " " ";" cmd_list ${optstring})
+	execute_process(
+	COMMAND
+		${GIT_EXECUTABLE} ${cmd_list}
+	WORKING_DIRECTORY
+		${CMAKE_SOURCE_DIR}
+	OUTPUT_VARIABLE
+		res
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	set( ${output} ${res} PARENT_SCOPE )
+endfunction()
 
+git_cmd( "show -s --format=%H" GIT_HASH)
+git_cmd( "show -s --format=%h" GIT_SHORT_HASH)
+git_cmd( "branch --show-current" GIT_BRANCH)
+git_cmd( "diff -w --shortstat" GIT_DIRTY)
+
+
+
+##########################################################
+# Add here more lines to do the CMake-variable to
+# C preprocessor define conversion.
+#
+target_compile_definitions(
+	timestamp
+	PRIVATE -DBUILD_TIME="${BUILD_TIME}"
+	PRIVATE -DGIT_HASH="${GIT_HASH}"
+	PRIVATE -DGIT_SHORT_HASH="${GIT_SHORT_HASH}"
+	PRIVATE -DGIT_BRANCH="${GIT_BRANCH}"
+	PRIVATE -DGIT_DIRTY="${GIT_DIRTY}"
+	PRIVATE -DCPACK_VERSION="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
+)
 
 ##########################################################
 # Only building of the timestamp library below this point.
 # No configuration should be necessary.
 #
-
-target_compile_definitions(
-	timestamp
-	PRIVATE -DBUILD_TIME="${BUILD_TIME}"
-	#PRIVATE -DGIT_REFSPEC="${GIT_REFSPEC}"
-	#PRIVATE -DGIT_SHA1="${GIT_SHA1}"
-	PRIVATE -DBUILD_NO="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
-)
 target_include_directories( timestamp
 	PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

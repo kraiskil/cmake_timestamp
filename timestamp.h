@@ -5,10 +5,12 @@
 extern "C" {
 #endif
 
-//extern const char* git_sha_str;
-//extern const char* git_refspec_str;
+extern const char* git_hash_str;
+extern const char* git_short_hash_str;
+extern const char* git_branch_str;
+extern const char* git_dirty_str;
 extern const char* build_time_str;
-extern const char* build_no;
+extern const char* cpack_version_str;
 
 #ifdef __cplusplus
 };
