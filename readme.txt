@@ -10,20 +10,29 @@ that nice looking, IMHO).
 
 Usage:
 -----
-Copy or clone the entire timestamp directory as a 
+Copy or clone the entire cmake_timestamp directory as a
 subdirectory of your sources.
 
-Then add to your CMakeLists.txt
+Then add to your CMakeLists.txt:
 
-	add_subdirectory(timestamp)
+	add_subdirectory(cmake_timestamp)
 
 and link your program against the library:
 
 	target_link_libraries( your_program timestamp)
 
+In your sources use the generated data:
 
-The timestamp library's CMakeLists.txt will force 
+	#include "timestamp.h"
+	...
+	std::cout << "this program compiled at " << build_time_str << std::endl
+
+The timestamp library's CMakeLists.txt will force
 a partial re-run of CMake every time you run your target
 generator (e.g. 'make'), so that the recorded timestamp
 (and other variables you might want to add) always reflect
 the status at link time of your library.
+
+Other compile time data is collected too, and more can be added.
+See the CMakeLists.txt for instructions.
+

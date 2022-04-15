@@ -1,9 +1,28 @@
 ###
 # Compile-time timestamping library
-# 
+#
 
 #CMake 3.12 made using OBJECT libraries much nicer, so we use that.
 cmake_minimum_required(VERSION 3.12)
+
+# Compile the library that contains the global variables
+add_library( timestamp OBJECT timestamp.c)
+
+
+##########################################################
+# Generate the compile-time data.
+# Each data item is saved as a CMake variable, that is passed
+# as a preprocessor define to the compiler.
+#
+# If you add new data items, they must be added to timestamp.c,
+# timestamp.h and the target_compile_definitions below.
+
+
+# Set CMake variable BUILD_TIME to 'now'.
+# This variable drives the CMake auto-update scripts, so
+# this must not be commented out!
+string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S" UTC)
+
 
 
 # optionaly, get also the git hash & refspec using
@@ -13,12 +32,11 @@ cmake_minimum_required(VERSION 3.12)
 #get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 
-# Set CMake variable BUILD_TIME to 'now'. This 'now' is the time
-# when CMake is run, not when the target builder (e.g. make) is run.
-string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S" UTC)
+##########################################################
+# Only building of the timestamp library below this point.
+# No configuration should be necessary.
+#
 
-# Compile the library that contains the global variables
-add_library( timestamp OBJECT timestamp.c)
 target_compile_definitions(
 	timestamp
 	PRIVATE -DBUILD_TIME="${BUILD_TIME}"
