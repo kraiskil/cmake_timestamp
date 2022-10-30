@@ -49,8 +49,10 @@ endfunction()
 
 git_cmd( "show -s --format=%H" GIT_HASH)
 git_cmd( "show -s --format=%h" GIT_SHORT_HASH)
-git_cmd( "branch --show-current" GIT_BRANCH)
 git_cmd( "diff -w --shortstat" GIT_DIRTY)
+if( ${GIT_VERSION_STRING} VERSION_GREATER_EQUAL 2.22 )
+	git_cmd( "branch --show-current" GIT_BRANCH)
+endif()
 
 
 
